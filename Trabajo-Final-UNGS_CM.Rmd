@@ -1,0 +1,80 @@
+---
+title: "Trabajo_final_UNGS"
+author: "CaroMatula"
+date: "21 de agosto de 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r Cars}
+
+library(dplyr)
+library(ggplot2)
+library(car) #LeveneTest
+
+# % Cobertura total entre 2014, 2015 y 2016
+#transformar el archivo xls en txt delimitado por tabulaciones
+datos <- read.delim("Tabla_1.txt") #asignamos Tabla_1, ahora tenemos los datos en R
+datos
+str(datos)
+datos$Año<-as.factor(datos$Año)#para que Año lo lea como factor
+
+colnames(datos)[colnames(datos)=="Año"] <- "Vindep"
+colnames(datos)[colnames(datos)=="CobTot"] <- "Vdep"
+str(datos)
+ 
+colnames(datos) #da el nombre de las columnas
+rownames(datos) #da el nombre de las filas
+nrow(datos) #da el numero de filas
+
+```
+Hacemos ANOVA
+```{r ANOVA}
+
+modelo<-aov(Vdep~Vindep, data=datos)  
+anova(modelo)
+
+par(mfrow=c(2,2))
+plot(modelo)
+
+
+
+```
+Probamos supuesto de normalidad
+```{r Normalidad}
+shapiro.test(residuals(modelo))
+
+
+```
+Probamos supuesto de homocedasticidad
+```{r Homocedasticidad}
+leveneTest(y=datos$Vdep, group =datos$Vindep)
+```
+
+```{r PostHoc}
+t <-TukeyHSD(modelo)
+t
+
+
+```
+
+## Including Plots
+hacemos grafico BOXPLOT
+
+```{r PLOTs}
+par(mfrow=c(1,1))
+boxplot(Vdep~Vindep,data=datos, xlab="Año", ylab="% Cobertura", col=(rainbow(3)))
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
